@@ -1,0 +1,54 @@
+name: test-task
+services:
+  # PHP
+  php:
+    build:
+      context: php
+      dockerfile: Dockerfile
+    volumes:
+      - "../public:/var/www/public"
+      - "../storage/logs:/var/www/storage/logs"
+      - "../src:/var/www/src"
+      - "../bootstrap:/var/www/bootstrap"
+      - "../vendor:/var/www/vendor"
+    environment:
+      REDIS_HOST: redis-server
+      REDIS_PORT: 6379
+  # Web Server
+  web-server:
+    build:
+      context: nginx
+      dockerfile: Dockerfile
+    restart: always
+    volumes:
+      - "../public:/var/www/public/"
+    ports:
+      - "8081:80"
+  # MySQL Database
+  mysql-server:
+    build:
+      context: mysql
+      dockerfile: Dockerfile
+    environment:
+      MYSQL_DATABASE: test_task
+      MYSQL_USER: alex
+      MYSQL_PASSWORD: 123
+      MYSQL_ROOT_PASSWORD: root
+    restart: always
+    volumes:
+      - ./mysql/test_task.sql:/docker-entrypoint-initdb.d/test_task.sql
+    ports:
+      - "33060:3306"
+  # Redis Server
+  redis-server:
+    image: redis:latest
+    restart: always
+    ports:
+      - "6379:6379"
+  # Composer
+  composer:
+    image: composer:latest
+    volumes:
+      - "..:/app"
+    working_dir: /app
+    command: [ "sh", "-c", "composer install && composer dump-autoload" ]

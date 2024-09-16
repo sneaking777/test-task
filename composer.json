@@ -1,0 +1,27 @@
+{
+  "name": "test-task/test-task",
+  "description": "Высокопроизводительный и масштабируемый сервис для работы с данными из базы данных, их обработки и предоставления API для взаимодействия с данными.",
+  "type": "project",
+  "require": {
+    "php": ">=8.3",
+    "ext-simplexml": "*",
+    "monolog/monolog": "^3.7",
+    "predis/predis": "^2.2",
+    "ext-libxml": "*",
+    "ext-pdo": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "App\\": "src/App/",
+      "Http\\": "src/Http/"
+    }
+  },
+  "scripts": {
+    "post-install-cmd": [
+      "echo 'Установка зависимостей завершена!'"
+    ],
+    "post-update-cmd": [
+      "echo 'Зависимости обновлены!'"
+    ]
+  }
+}
