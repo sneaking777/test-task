@@ -6,33 +6,42 @@ namespace Http;
 
 
 /**
- * Класс Request представляет HTTP-запрос.
+ *
+ * Класс, представляющий HTTP-запрос
  *
  * @package Http
+ * @author Alexander Mityukhin <almittt@mail.ru>
+ * @date 17.09.2024 3:07
  */
 class Request
 {
+    
     /**
+     * HTTP-метод запроса
      * @var string
      */
     private string $method;
 
     /**
+     * URI запроса
      * @var string
      */
     private string $uri;
 
     /**
+     * Заголовки запроса
      * @var array
      */
     private array $headers;
 
     /**
+     * Тело запроса
      * @var string
      */
     private string $body;
 
     /**
+     * Параметры запроса (query params)
      * @var array
      */
     private array $queryParams;
@@ -62,6 +71,18 @@ class Request
         $this->queryParams = $queryParams;
     }
 
+    /**
+     * Создаёт экземпляр Request на основе глобальных данных запроса
+     *
+     * @return self Возвращает новый экземпляр класса Request
+     *
+     * Примечание:
+     * - HTTP метод берётся из $_SERVER['REQUEST_METHOD']
+     * - URI берётся из $_SERVER['REQUEST_URI']
+     * - Заголовки берутся с помощью функции getallheaders()
+     * - Тело запроса считывается из 'php://input'
+     * - Параметры запроса парсятся из $_SERVER['QUERY_STRING'] с использованием функции parse_str()
+     */
     public static function fromGlobals(): self
     {
         $method = $_SERVER['REQUEST_METHOD'];

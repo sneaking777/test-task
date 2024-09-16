@@ -3,18 +3,42 @@
 namespace App\Services;
 
 use App\Repositories\OrdersRepository;
+use DateMalformedStringException;
+use Exception;
 
+/**
+ * OrdersService - Сервис для работы с заказами.
+ *
+ * @package App\Services
+ * @author Alexander Mityukhin <almittt@mail.ru>
+ * @date 17.09.2024 2:38
+ */
 class OrdersService
 {
+    /**
+     * @var OrdersRepository хранилище заказов
+     */
     private OrdersRepository $orderRepository;
 
-
+    /**
+     * Конструктор
+     * 
+     * @param OrdersRepository $orderRepository
+     */
     public function __construct(OrdersRepository $orderRepository)
     {
         $this->orderRepository = $orderRepository;
 
     }
 
+
+    /**
+     * Создание заказов из XML строки
+     *
+     * @param string $xmlOrders XML заказы в формате строки
+     * @return array Массив с информацией о статусе, сообщением и количеством заказов
+     * @throws Exception Исключение в случае ошибки сохранения заказов
+     */
     public function createXmlOrders(string $xmlOrders): array
     {
         // Парсинг XML строки в объект
@@ -33,7 +57,14 @@ class OrdersService
         ];
 
     }
-
+    
+    /**
+     * Создание заказов из JSON строки
+     *
+     * @param string $jsonOrders JSON заказы в формате строки
+     * @return array Массив с информацией о статусе, сообщением и количеством заказов
+     * @throws Exception Исключение в случае ошибки сохранения заказов
+     */
     public function createJsonOrders(string $jsonOrders): array
     {
         $orders = json_decode($jsonOrders, true)['orders'];
@@ -47,9 +78,18 @@ class OrdersService
 
     }
 
+
     /**
-     * @param array $filterParams
-     * @return array
+     * Получение заказов с возможностью фильтрации и кэширования
+     *
+     * @param array $filterParams Параметры фильтрации, включающие:
+     *                            - start_date (string|null): Начальная дата
+     *                            - end_date (string|null): Конечная дата
+     *                            - status (string|null): Статус заказа
+     *                            - page (int): Номер страницы
+     *                            - page_size (int): Количество заказов на странице
+     * @return array Массив с информацией о статусе и найденными заказами
+     * @throws DateMalformedStringException Исключение в случае некорректной строки даты
      */
     public function getOrders(array $filterParams): array
     {

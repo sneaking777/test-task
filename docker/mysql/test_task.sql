@@ -7,8 +7,8 @@ CREATE TABLE orders
     order_date  TIMESTAMP      NOT NULL COMMENT 'Дата и время размещения заказа',
     status      VARCHAR(50)    NOT NULL COMMENT 'Статус заказа (например, ''в ожидании'', ''завершен'')',
     total       DECIMAL(10, 2) NOT NULL COMMENT 'Общая сумма заказа',
-    created_at  DATETIME       NOT NULL COMMENT 'Временная отметка создания записи заказа',
-    updated_at  DATETIME       NULL COMMENT 'Временная отметка последнего обновления записи заказа',
+    created_at  TIMESTAMP      NOT NULL COMMENT 'Временная отметка создания записи заказа',
+    updated_at  TIMESTAMP      NULL COMMENT 'Временная отметка последнего обновления записи заказа',
     INDEX idx_customer_id (customer_id)
 )
 -- Добавление комментария к таблице

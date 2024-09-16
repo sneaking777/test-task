@@ -5,10 +5,31 @@ namespace App;
 use App\Repositories\OrdersRepository;
 use App\Services\OrdersService;
 
+
+/**
+ *
+ * Класс для управления контейнером зависимостей.
+ *
+ * @package App
+ *
+ * @author Alexander Mityukhin <almittt@mail.ru>
+ * @date 17.09.2024 3:03
+ */
 class ContainerManager
 {
+    /**
+     * @var Container|null 
+     */
     private static ?Container $container = null;
 
+
+    /**
+     * Возвращает экземпляр контейнера зависимостей.
+     * Если контейнер ещё не был инициализирован, он создаётся и
+     * происходит инициализация всех необходимых сервисов.
+     *
+     * @return Container Экземпляр контейнера зависимостей.
+     */
     public static function getContainer(): Container
     {
         if (null === self::$container) {

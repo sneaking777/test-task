@@ -2,22 +2,44 @@
 
 namespace App\Repositories;
 
+use DateMalformedStringException;
 use DateTime;
 use PDO;
 use Exception;
 
+
+/**
+ * Класс для работы с хранилищем заказов.
+ * 
+ * @package App\Repositories
+ */
 class OrdersRepository
 {
+    /**
+     * @var PDO $pdo Объект PDO для подключения к базе данных.
+     */
     private PDO $dbConnection;
 
     private const int BATCH_SIZE = 1000; // Количество заказов в одной пачке
 
-    public function __construct($pdo)
+    /**
+     * Конструктор
+     *
+     * @param PDO $pdo
+     */
+    public function __construct(PDO $pdo)
     {
         $this->dbConnection = $pdo;
     }
 
-
+    /**
+     * Метод для получения общего количества заказов.
+     *
+     * Этот метод выполняет SQL-запрос для подсчета всех записей в таблице заказов
+     * и возвращает их количество в виде целого числа.
+     *
+     * @return int Общее количество заказов.
+     */
     public function findTotalOrderCount(): int
     {
         $sql = "SELECT COUNT(*) as count FROM orders";
@@ -27,7 +49,23 @@ class OrdersRepository
         return (int)$result['count'];
     }
 
-
+    
+    /**
+     * Получение списка заказов с учетом фильтров и пагинации.
+     *
+     * Этот метод позволяет получать заказы, отфильтрованные по дате начала и конца,
+     * статусу, а также с использованием пагинации. Лимит и смещение результатов
+     * задается параметрами $page и $pageSize.
+     * Если дата окончания указана, она автоматически устанавливается на конец дня.
+     *
+     * @param string|null $startDate Дата начала фильтрации (включительно) в формате 'Y-m-d'.
+     * @param string|null $endDate Дата окончания фильтрации (включительно) в формате 'Y-m-d'.
+     * @param string|null $status Фильтр по статусу заказа.
+     * @param int $page Номер страницы для пагинации (по умолчанию 1).
+     * @param int $pageSize Количество заказов на страницу (по умолчанию 10).
+     * @return array Массив заказов, подходящих под заданные критерии.
+     * @throws DateMalformedStringException Исключение, если переданы некорректные даты.
+     */
     public function fetchOrders(
         string $startDate = null,
         string $endDate = null,
@@ -73,6 +111,18 @@ class OrdersRepository
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    /**
+     * Сохранение заказов в базе данных.
+     *
+     * Этот метод принимает массив заказов и сохраняет их в базе данных.
+     * Заказы делятся на части по BATCH_SIZE, и каждая часть вставляется в таблицу orders.
+     * Используется транзакция для обеспечения целостности данных: если хотя бы одна вставка
+     * не удалась, все изменения отменяются.
+     *
+     * @param array $orders Массив заказов для сохранения.
+     * @return void
+     * @throws Exception Исключение, если произошла ошибка при сохранении заказов.
+     */
     public function saveOrders(array $orders): void
     {
         if (empty($orders)) {
@@ -91,12 +141,20 @@ class OrdersRepository
 
                 foreach ($chunk as $order) {
                     $values[] = "(?, ?, ?, ?, ?, ?)";
-                    array_push($params, $order['customer_id'], $order['order_date'], $order['status'], $order['total'], $order['created_at'], $order['updated_at']);
+                    array_push(
+                        $params,
+                        $order['customer_id'],
+                        $order['order_date'],
+                        $order['status'],
+                        $order['total'],
+                        $order['created_at'],
+                        $order['updated_at']);
                 }
 
                 // Объединение всех строк VALUES в один запрос
                 $valuesString = implode(',', $values);
-                $sql = "INSERT INTO orders (customer_id, order_date, status, total, created_at, updated_at) VALUES $valuesString";
+                $sql = "INSERT INTO orders (customer_id, order_date, status, total, created_at, updated_at) 
+                        VALUES $valuesString";
 
                 // Подготовка и выполнение запроса
                 $stmt = $this->dbConnection->prepare($sql);

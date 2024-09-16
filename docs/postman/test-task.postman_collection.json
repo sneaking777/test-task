@@ -1,0 +1,461 @@
+{
+	"info": {
+		"_postman_id": "c7200dbf-aada-4229-bc92-247fabb18959",
+		"name": "test-task",
+		"description": "```\nВысокопроизводительный и масштабируемый сервис для работы с данными из базы данных, их обработки и предоставления API для взаимодействия с данными.\n\n ```",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "11880819"
+	},
+	"item": [
+		{
+			"name": "Загрузка данных в формате JSON",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Pre-request Script (в Postman)\r",
+							"const NUM_ORDERS = 10000; // Количество заказов, которое вы хотите сгенерировать\r",
+							"\r",
+							"// Возможные статусы заказа\r",
+							"const statuses = [\"completed\", \"pending\", \"canceled\", \"processing\"];\r",
+							"\r",
+							"// Функция для получения случайного статуса\r",
+							"function getRandomStatus() {\r",
+							"    return statuses[Math.floor(Math.random() * statuses.length)];\r",
+							"}\r",
+							"\r",
+							"// Функция для генерации случайной суммы в пределах от min до max\r",
+							"function getRandomTotal(min, max) {\r",
+							"    return (Math.random() * (max - min) + min).toFixed(2);\r",
+							"}\r",
+							"\r",
+							"// Функция для форматирования даты в формат 'YYYY-MM-DD HH:MM:SS'\r",
+							"function formatDateToMySQL(datetime) {\r",
+							"    const pad = (n) => n < 10 ? '0' + n : n;\r",
+							"    return datetime.getFullYear() + '-' +\r",
+							"           pad(datetime.getMonth() + 1) + '-' +\r",
+							"           pad(datetime.getDate()) + ' ' +\r",
+							"           pad(datetime.getHours()) + ':' +\r",
+							"           pad(datetime.getMinutes()) + ':' +\r",
+							"           pad(datetime.getSeconds());\r",
+							"}\r",
+							"\r",
+							"// Генерируем заказы\r",
+							"let orders = [];\r",
+							"for (let i = 0; i < NUM_ORDERS; i++) {\r",
+							"    let currentDate = new Date(new Date().getTime() + i * 60000); // Уникальный временной штамп\r",
+							"    let order = {\r",
+							"        order_id: i + 1, // Идентификатор заказа\r",
+							"        customer_id: 101 + i, // Делаем идентификатор клиента уникальным\r",
+							"        order_date: formatDateToMySQL(currentDate), // Форматируем дату в MySQL формат\r",
+							"        status: getRandomStatus(), // Назначаем случайный статус\r",
+							"        total: getRandomTotal(50, 500), // Случайная сумма заказа от 50.00 до 500.00\r",
+							"        created_at: formatDateToMySQL(new Date()), // Дата создания записи в MySQL формате\r",
+							"        updated_at: formatDateToMySQL(new Date()) // Дата обновления записи в MySQL формате\r",
+							"    };\r",
+							"    orders.push(order);\r",
+							"}\r",
+							"\r",
+							"// Объект для хранения заказов в переменной окружения\r",
+							"const ordersWrapper = {\r",
+							"    orders: orders\r",
+							"};\r",
+							"\r",
+							"// Сохраняем в переменную окружения\r",
+							"pm.environment.set(\"orders\", JSON.stringify(ordersWrapper));"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{{orders}}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/api/orders/json",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"api",
+						"orders",
+						"json"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Загрузка данных в формате JSON",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{{orders}}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/api/orders/json",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"api",
+								"orders",
+								"json"
+							]
+						}
+					},
+					"_postman_previewlanguage": null,
+					"header": null,
+					"cookie": [],
+					"body": null
+				}
+			]
+		},
+		{
+			"name": "Загрузка данных в формате XML",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const ordersCount = 10000;\r",
+							"const statuses = ['completed', 'pending', 'cancelled'];\r",
+							"const orders = [];\r",
+							"\r",
+							"function formatDate(date) {\r",
+							"    const d = new Date(date);\r",
+							"    const year = d.getFullYear();\r",
+							"    const month = ('0' + (d.getMonth() + 1)).slice(-2);\r",
+							"    const day = ('0' + d.getDate()).slice(-2);\r",
+							"    const hours = ('0' + d.getHours()).slice(-2);\r",
+							"    const minutes = ('0' + d.getMinutes()).slice(-2);\r",
+							"    const seconds = ('0' + d.getSeconds()).slice(-2);\r",
+							"\r",
+							"    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;\r",
+							"}\r",
+							"\r",
+							"for (let i = 1; i <= ordersCount; i++) {\r",
+							"    const now = new Date();\r",
+							"    const order = {\r",
+							"        customer_id: Math.floor(Math.random() * 1000) + 1,\r",
+							"        order_date: formatDate(now),\r",
+							"        status: statuses[Math.floor(Math.random() * statuses.length)],\r",
+							"        total: (Math.random() * 1000).toFixed(2),\r",
+							"        created_at: formatDate(now),\r",
+							"        updated_at: formatDate(now)\r",
+							"    };\r",
+							"    orders.push(order);\r",
+							"}\r",
+							"\r",
+							"function jsonToXml(json) {\r",
+							"    let xml = '<orders>';\r",
+							"    \r",
+							"    json.forEach(order => {\r",
+							"        xml += '<order>';\r",
+							"        \r",
+							"        Object.keys(order).forEach(key => {\r",
+							"            xml += `<${key}>${order[key]}</${key}>`;\r",
+							"        });\r",
+							"        \r",
+							"        xml += '</order>';\r",
+							"    });\r",
+							"    \r",
+							"    xml += '</orders>';\r",
+							"    return xml;\r",
+							"}\r",
+							"\r",
+							"const xmlData = `<?xml version=\"1.0\" encoding=\"UTF-8\"?>\\n${jsonToXml(orders)}`;\r",
+							"\r",
+							"pm.environment.set(\"orders_xml\", xmlData);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{{orders_xml}}",
+					"options": {
+						"raw": {
+							"language": "xml"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/api/orders/xml",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"api",
+						"orders",
+						"xml"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Загрузка данных в формате XML",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{{orders_xml}}",
+							"options": {
+								"raw": {
+									"language": "xml"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/api/orders/xml",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"api",
+								"orders",
+								"xml"
+							]
+						}
+					},
+					"_postman_previewlanguage": null,
+					"header": null,
+					"cookie": [],
+					"body": null
+				}
+			]
+		},
+		{
+			"name": "Возвращает данные в формате JSON",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8081/api/orders/json?start_date=2024-09-14&end_date=2024-09-16&status=processing&page=1&page_size=5",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"api",
+						"orders",
+						"json"
+					],
+					"query": [
+						{
+							"key": "start_date",
+							"value": "2024-09-14"
+						},
+						{
+							"key": "end_date",
+							"value": "2024-09-16"
+						},
+						{
+							"key": "status",
+							"value": "processing"
+						},
+						{
+							"key": "page",
+							"value": "1"
+						},
+						{
+							"key": "page_size",
+							"value": "5"
+						}
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Возвращает данные в формате JSON",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8081/api/orders/json?start_date=2024-09-14&end_date=2024-09-16&status=processing&page=1&page_size=5",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"api",
+								"orders",
+								"json"
+							],
+							"query": [
+								{
+									"key": "start_date",
+									"value": "2024-09-14"
+								},
+								{
+									"key": "end_date",
+									"value": "2024-09-16"
+								},
+								{
+									"key": "status",
+									"value": "processing"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "page_size",
+									"value": "5"
+								}
+							]
+						}
+					},
+					"_postman_previewlanguage": null,
+					"header": null,
+					"cookie": [],
+					"body": null
+				}
+			]
+		},
+		{
+			"name": "Возвращает данные в формате XML",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/api/orders/xml?start_date=2024-09-14&end_date=2024-09-16&status=processing&page=1&page_size=10",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"api",
+						"orders",
+						"xml"
+					],
+					"query": [
+						{
+							"key": "start_date",
+							"value": "2024-09-14"
+						},
+						{
+							"key": "end_date",
+							"value": "2024-09-16"
+						},
+						{
+							"key": "status",
+							"value": "processing"
+						},
+						{
+							"key": "page",
+							"value": "1"
+						},
+						{
+							"key": "page_size",
+							"value": "10"
+						}
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Возвращает данные в формате XML",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/api/orders/xml?start_date=2024-09-14&end_date=2024-09-16&status=processing&page=1&page_size=10",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"api",
+								"orders",
+								"xml"
+							],
+							"query": [
+								{
+									"key": "start_date",
+									"value": "2024-09-14"
+								},
+								{
+									"key": "end_date",
+									"value": "2024-09-16"
+								},
+								{
+									"key": "status",
+									"value": "processing"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "page_size",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"_postman_previewlanguage": null,
+					"header": null,
+					"cookie": [],
+					"body": null
+				}
+			]
+		}
+	]
+}
